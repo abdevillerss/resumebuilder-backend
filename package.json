@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "scripts": {
-    "start": "node dist/server.js",
-    "server": "nodemon --exec babel-node server.js",
-    "build": "babel . --out-dir dist --copy-files --ignore node_modules"
-  },
+"scripts": {
+  "start": "node dist/server.js",
+  "server": "nodemon --watch './' --exec 'npm run build && node dist/server.js'",
+  "build": "babel . --out-dir dist --copy-files --ignore node_modules"
+},
   "author": "",
   "license": "ISC",
   "engines": {
