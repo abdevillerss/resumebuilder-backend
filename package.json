@@ -4,9 +4,9 @@
   "description": "",
   "main": "server.js",
 "scripts": {
-  "start": "node dist/server.js",
-  "server": "nodemon --watch './' --exec 'npm run build && node dist/server.js'",
-"build": "babel . --out-dir dist --copy-files --ignore node_modules,.git"
+  "start": "npm run build && node dist/server.js",
+  "server": "nodemon --exec babel-node server.js",
+  "build": "babel . --out-dir dist --copy-files --ignore node_modules,.git"
 },
   "author": "",
   "license": "ISC",
@@ -30,6 +30,8 @@
     "openai": "^4.51.0"
   },
   "devDependencies": {
+    "@babel/node": "^7.28.0",
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.2"
   }
 }
