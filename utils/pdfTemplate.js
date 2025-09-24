@@ -1,151 +1,352 @@
 
-const getResumeHTML = (resumeData, templateName = 'modern') => {
-    // Helper function to sanitize text to prevent HTML injection
-    const sanitize = (text) => {
-        if (!text) return '';
-        return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    };
 
 
-    const personalDetails = resumeData.personalDetails || {};
-    const experience = resumeData.experience || [];
-    const education = resumeData.education || [];
-    const projects = resumeData.projects || [];
-    const skills = resumeData.skills || [];
-    const summary = resumeData.summary || '';
+// const React = require('react');
+// const { renderToStream } = require('@react-pdf/renderer');
+// const { Page, Text, View, Document, StyleSheet } = require('@react-pdf/renderer');
 
-    let styles = '';
-    let body = '';
+// const styles = StyleSheet.create({
+//     page: { fontFamily: 'Helvetica', fontSize: 10, padding: '1.5cm', color: '#333' },
+//     header: { textAlign: 'center', borderBottomWidth: 2, borderBottomColor: '#333', paddingBottom: 12, marginBottom: 12 },
+//     name: { fontSize: 26, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2 },
+//     title: { fontSize: 12, color: '#444', marginTop: 4 },
+//     contactInfo: { textAlign: 'center', fontSize: 9, color: '#555', marginBottom: 15 },
+//     section: { marginBottom: 15 },
+//     sectionTitle: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', borderBottomWidth: 1, borderBottomColor: '#555', paddingBottom: 4, marginBottom: 8 },
+//     item: { marginBottom: 12 },
+//     itemHeader: { flexDirection: 'row', justifyContent: 'space-between', fontSize: 10.5, fontWeight: 'bold' },
+//     itemSubheader: { fontStyle: 'italic', color: '#444', marginVertical: 2 },
+//     bulletPoint: { flexDirection: 'row', marginBottom: 4, paddingLeft: 5 },
+//     bullet: { width: 10, fontSize: 10 },
+//     bulletText: { flex: 1 },
+//     summaryText: { lineHeight: 1.5, textAlign: 'justify' },
+// });
 
-
-    switch (templateName) {
-        case 'professional': 
-        case 'modern':
-        default:
-            styles = `
-                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10pt; color: #333; margin: 40px; background-color: #fff; }
-                .header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid #000; }
-                .name-title { font-size: 24pt; font-weight: bold; color: #000; margin: 0; text-transform: uppercase; }
-                .contact-info { text-align: center; font-size: 9pt; color: #333; margin-top: 5px; margin-bottom: 15px; }
-                .contact-info a { color: #333; text-decoration: none; }
-                .section { margin-bottom: 15px; }
-                .section-title { font-size: 11pt; font-weight: bold; text-transform: uppercase; color: #000; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px; }
-                .item { margin-bottom: 10px; }
-                .item-header { display: flex; justify-content: space-between; align-items: baseline; }
-                .item-title { font-weight: bold; font-size: 10.5pt; }
-                .item-subheader { font-style: normal; color: #333; }
-                .about-box { font-size: 10pt; margin: 4px 0; }
-                .item-content ul { padding-left: 18px; margin-top: 5px; list-style-type: disc; }
-                .skills-list { padding: 0; margin: 0; }
-                .skills-list li { margin-bottom: 5px; }
-            `;
-            body = `
-                <div class="header">
-                    <h1 class="name-title">${sanitize(personalDetails.name)}</h1>
-                </div>
-                <div class="contact-info">
-                    <span>${sanitize(personalDetails.phone)}</span> &bull;
-                    <a href="mailto:${sanitize(personalDetails.email)}">${sanitize(personalDetails.email)}</a> &bull;
-                    <a href="${sanitize(personalDetails.linkedin)}" target="_blank">${sanitize(personalDetails.linkedin)}</a>
-                </div>
-                <div class="section">
-                    <h2 class="section-title">Summary</h2>
-                    <p>${sanitize(summary)}</p>
-                </div>
-                <div class="section">
-                    <h2 class="section-title">Education</h2>
-                    ${education.map(edu => `
-                        <div class="item">
-                            <div class="item-header">
-                                <span class="item-title">${sanitize(edu.school)}</span>
-                                <span style="font-size: 9.5pt;">${sanitize(edu.gradDate)}</span>
-                            </div>
-                            <div class="item-subheader">${sanitize(edu.degree)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="section">
-                    <h2 class="section-title">Technical Skills</h2>
-                    <div class="item-content">
-                        <ul>${(skills || []).map(line => `<li>${sanitize(line)}</li>`).join('')}</ul>
-                    </div>
-                </div>
-                <div class="section">
-                    <h2 class="section-title">Projects</h2>
-                    ${projects.map(proj => `
-                        <div class="item">
-                            <div class="item-header"><span class="item-title">${sanitize(proj.title)}</span></div>
-                            <p class="about-box">${sanitize(proj.about)}</p>
-                            <div class="item-content"><ul>${(proj.description || []).map(line => `<li>${sanitize(line)}</li>`).join('')}</ul></div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="section">
-                    <h2 class="section-title">Experience</h2>
-                    ${experience.map(exp => `
-                        <div class="item">
-                            <div class="item-header">
-                                <span class="item-title">${sanitize(exp.jobTitle)}</span>
-                                <span style="font-size: 9.5pt;">${sanitize(exp.startDate)} - ${sanitize(exp.endDate)}</span>
-                            </div>
-                            <div class="item-subheader">${sanitize(exp.company)}</div>
-                            <p class="about-box">${sanitize(exp.about)}</p>
-                            <div class="item-content"><ul>${(exp.description || []).map(line => `<li>${sanitize(line)}</li>`).join('')}</ul></div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            break;
-        case 'classic':
-             styles = `
-                body { font-family: 'Georgia', Times, 'Times New Roman', serif; color: #222; font-size: 11pt; line-height: 1.4; }
-                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                .header .name-title { font-size: 28pt; font-weight: bold; }
-                .header .contact-info { font-size: 10pt; color: #555; }
-                .section { margin-bottom: 15px; }
-                .section-title { font-size: 14pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
-                .item { margin-bottom: 12px; }
-                .item-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 2px; }
-                .item-subheader { font-style: italic; color: #555; margin-bottom: 4px; }
-                .item-content ul { padding-left: 20px; margin: 0; }
-                .skills-list { columns: 2; }
-            `;
-            body = `
-                <div class="header">
-                    <div class="name-title">${sanitize(personalDetails.name)}</div>
-                    <div class="contact-info">
-                        ${sanitize(personalDetails.phone)} | ${sanitize(personalDetails.email)} | ${sanitize(personalDetails.linkedin)} | ${sanitize(personalDetails.github)}
-                    </div>
-                </div>
-                <div class="section"><h2 class="section-title">Professional Experience</h2>
-                    ${experience.map(exp => `
-                        <div class="item">
-                            <div class="item-header"><span><strong>${sanitize(exp.jobTitle)}</strong>, ${sanitize(exp.company)}</span><span>${sanitize(exp.startDate)} - ${sanitize(exp.endDate)}</span></div>
-                            <div class="item-subheader">${sanitize(exp.location)}</div>
-                            <div class="item-content"><ul>${(exp.description || []).map(line => `<li>${sanitize(line)}</li>`).join('')}</ul></div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="section"><h2 class="section-title">Projects</h2>
-                     ${projects.map(proj => `
-                        <div class="item">
-                            <div class="item-header"><span><strong>${sanitize(proj.title)}</strong></span><span>${sanitize(proj.duration)}</span></div>
-                            <div class="item-content"><ul>${(proj.description || []).map(line => `<li>${sanitize(line)}</li>`).join('')}</ul></div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="section"><h2 class="section-title">Technical Skills</h2>
-                    <div class="skills-list">${skills.map(skill => `<div>- ${sanitize(skill)}</div>`).join('')}</div>
-                </div>
-                <div class="section"><h2 class="section-title">Education</h2>
-                    ${education.map(edu => `<div class="item"><div class="item-header"><span><strong>${sanitize(edu.school)}</strong> - ${sanitize(edu.degree)}</span><span>${sanitize(edu.gradDate)}</span></div></div>`).join('')}
-                </div>
-            `;
-            break;
-    }
-
+// const PdfDocument = ({ resumeData }) => {
+//     const { personalDetails = {}, sections = [], summary = '', experience = [], projects = [], education = [], skills = [] } = resumeData;
     
-    return `<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Resume</title><link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Georgia&display=swap" rel="stylesheet"><style>${styles}</style></head><body>${body}</body></html>`;
+//     const renderBulletPoints = (points) => {
+//         return (points || []).map((point, j) => (
+//             <View key={j} style={styles.bulletPoint}>
+//                 <Text style={styles.bullet}>•</Text>
+//                 <Text style={styles.bulletText}>{point}</Text>
+//             </View>
+//         ));
+//     };
+
+//     return (
+//         <Document>
+//             <Page size="A4" style={styles.page}>
+//                 <View style={styles.header}>
+//                     <Text style={styles.name}>{personalDetails.name || ''}</Text>
+//                     <Text style={styles.title}>{personalDetails.professionalTitle || ''}</Text>
+//                 </View>
+//                 <Text style={styles.contactInfo}>{personalDetails.phone || ''} • {personalDetails.email || ''}</Text>
+
+//                 {sections.map((section, i) => {
+//                     if (section.key === 'summary' && resumeData.summary) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 <Text style={styles.summaryText}>{resumeData.summary}</Text>
+//                             </View>
+//                         );
+//                     }
+//                     if (section.key === 'experience' && resumeData.experience) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 {resumeData.experience.map((exp, j) => (
+//                                     <View key={j} style={styles.item}>
+//                                         <View style={styles.itemHeader}>
+//                                             <Text>{exp.jobTitle || ''}</Text>
+//                                             <Text>{exp.duration || ''}</Text>
+//                                         </View>
+//                                         <Text style={styles.itemSubheader}>{exp.company || ''}</Text>
+//                                         {renderBulletPoints([exp.description])}
+//                                     </View>
+//                                 ))}
+//                             </View>
+//                         );
+//                     }
+//                     if (section.key === 'projects' && resumeData.projects) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 {resumeData.projects.map((proj, j) => (
+//                                     <View key={j} style={styles.item}>
+//                                         <View style={styles.itemHeader}><Text>{proj.projectTitle || ''}</Text></View>
+//                                         <Text style={styles.itemSubheader}>{proj.description || ''}</Text>
+//                                         {renderBulletPoints(proj.bulletPoints)}
+//                                     </View>
+//                                 ))}
+//                             </View>
+//                         );
+//                     }
+//                     if (section.key === 'education' && resumeData.education) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 {resumeData.education.map((edu, j) => (
+//                                     <View key={j} style={styles.item}>
+//                                         <View style={styles.itemHeader}>
+//                                             <Text>{edu.universityName || ''}</Text>
+//                                             <Text>{edu.duration || ''}</Text>
+//                                         </View>
+//                                         <Text style={styles.itemSubheader}>{edu.degree || ''}</Text>
+//                                     </View>
+//                                 ))}
+//                             </View>
+//                         );
+//                     }
+//                     if (section.key === 'skills' && resumeData.skills) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 <Text>{(resumeData.skills || []).join(', ')}</Text>
+//                             </View>
+//                         );
+//                     }
+//                     if (section.isCustom) {
+//                         return (
+//                             <View key={i} style={styles.section}>
+//                                 <Text style={styles.sectionTitle}>{section.title}</Text>
+//                                 {section.type === 'list-with-bullets' ? (
+//                                     (resumeData[section.key] || []).map((item, j) => (
+//                                         <View key={j} style={styles.item}>
+//                                             <View style={styles.itemHeader}><Text>{item.title || ''}</Text></View>
+//                                             <Text style={styles.itemSubheader}>{item.subtitle || ''}</Text>
+//                                             {renderBulletPoints(item.bulletPoints)}
+//                                         </View>
+//                                     ))
+//                                 ) : section.type === 'single-input-and-description' ? (
+//                                     (resumeData[section.key] || []).map((item, j) => (
+//                                         <View key={j} style={styles.item}>
+//                                             <View style={styles.itemHeader}><Text>{item.title || ''}</Text></View>
+//                                             <Text style={styles.summaryText}>{item.description || ''}</Text>
+//                                         </View>
+//                                     ))
+//                                 ) : (
+//                                     <Text style={styles.summaryText}>{resumeData[section.key] || ''}</Text>
+//                                 )}
+//                             </View>
+//                         );
+//                     }
+//                     return null;
+//                 })}
+//             </Page>
+//         </Document>
+//     );
+// };
+
+// const generatePdf = async (resumeData) => {
+//     try {
+//         const stream = await renderToStream(<PdfDocument resumeData={resumeData} />);
+//         return stream;
+//     } catch (error) {
+//         console.error("React-PDF Generation Error:", error);
+//         throw new Error('Could not generate PDF.');
+//     }
+// };
+
+// module.exports = { generatePdf };
+
+
+
+
+
+
+
+// backend/utils/pdfTemplate.js
+
+const React = require('react');
+const { renderToStream } = require('@react-pdf/renderer');
+const { Page, Text, View, Document, StyleSheet } = require('@react-pdf/renderer');
+
+// --- STYLES FOR TEMPLATE 1: Academic ---
+const academicStyles = StyleSheet.create({
+    page: { fontFamily: 'Times-Roman', fontSize: 11, padding: '1cm 1.4cm', color: '#333' },
+    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 10 },
+    headerLeft: { maxWidth: '65%' },
+    headerRight: { textAlign: 'right', fontSize: 9, maxWidth: '35%' },
+    name: { fontSize: 28, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 5 },
+    headerInfo: { fontSize: 10, marginBottom: 2 },
+    link: { color: 'blue', textDecoration: 'underline' },
+    section: { marginBottom: 12 },
+    sectionTitleContainer: { backgroundColor: '#f3f3f3', paddingVertical: 4, paddingHorizontal: 6, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: '#ccc' },
+    sectionTitle: { fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase' },
+    item: { marginBottom: 8 },
+    itemHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+    itemTitle: { fontWeight: 'bold', fontSize: 11 },
+    itemDate: { fontStyle: 'italic', fontSize: 10 },
+    itemSubtitle: { fontStyle: 'italic', fontSize: 10, marginBottom: 3 },
+    itemList: { marginLeft: 15, marginTop: 2 },
+    bulletPoint: { flexDirection: 'row', marginBottom: 2 },
+    bullet: { width: 10, fontSize: 10 },
+    bulletText: { flex: 1, fontSize: 10 },
+    skillsSection: { marginTop: 5 },
+    skillItem: { flexDirection: 'row', marginBottom: 2 },
+    skillCategory: { fontWeight: 'bold', fontSize: 10 },
+    skillText: { fontSize: 10 },
+});
+
+// --- COMPONENT FOR TEMPLATE 1: Academic ---
+const AcademicTemplate = ({ resumeData }) => {
+    const { personalDetails = {}, summary = '', experience = [], projects = [], education = [], skills = [] } = resumeData;
+
+    return (
+        <Document>
+            <Page size="A4" style={academicStyles.page}>
+                <View style={academicStyles.header}>
+                    <View style={academicStyles.headerLeft}>
+                        <Text style={academicStyles.name}>{personalDetails.name || 'Your Name'}</Text>
+                        <Text style={academicStyles.headerInfo}>{personalDetails.professionalTitle || 'Professional Title'}</Text>
+                    </View>
+                    <View style={academicStyles.headerRight}>
+                        <Text style={academicStyles.headerInfo}>{personalDetails.phone}</Text>
+                        <Text style={academicStyles.headerInfo}>{personalDetails.email}</Text>
+                        <Text style={academicStyles.headerInfo}>{personalDetails.linkedin}</Text>
+                        <Text style={academicStyles.headerInfo}>{personalDetails.github}</Text>
+                    </View>
+                </View>
+
+                {education.length > 0 && (
+                    <View style={academicStyles.section}>
+                        <View style={academicStyles.sectionTitleContainer}><Text style={academicStyles.sectionTitle}>Education</Text></View>
+                        {education.map((edu, i) => (
+                            <View key={i} style={academicStyles.item}>
+                                <View style={academicStyles.itemHeader}>
+                                    <Text style={academicStyles.itemTitle}>{edu.universityName}</Text>
+                                    <Text style={academicStyles.itemDate}>{edu.duration}</Text>
+                                </View>
+                                <Text style={academicStyles.itemSubtitle}>{edu.degree}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {projects.length > 0 && (
+                    <View style={academicStyles.section}>
+                        <View style={academicStyles.sectionTitleContainer}><Text style={academicStyles.sectionTitle}>Projects</Text></View>
+                        {projects.map((proj, i) => (
+                            <View key={i} style={academicStyles.item}>
+                                <Text style={academicStyles.itemTitle}>{proj.projectTitle}</Text>
+                                {proj.description && <Text style={academicStyles.itemSubtitle}>{proj.description}</Text>}
+                                <View style={academicStyles.itemList}>
+                                    {(proj.bulletPoints || []).map((point, j) => (
+                                        <View key={j} style={academicStyles.bulletPoint}><Text style={academicStyles.bullet}>•</Text><Text style={academicStyles.bulletText}>{point}</Text></View>
+                                    ))}
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+                
+                {experience.length > 0 && (
+                     <View style={academicStyles.section}>
+                        <View style={academicStyles.sectionTitleContainer}><Text style={academicStyles.sectionTitle}>Experience</Text></View>
+                        {experience.map((exp, i) => (
+                            <View key={i} style={academicStyles.item}>
+                                <View style={academicStyles.itemHeader}>
+                                    <Text style={academicStyles.itemTitle}>{exp.jobTitle} at {exp.company}</Text>
+                                    <Text style={academicStyles.itemDate}>{exp.duration}</Text>
+                                </View>
+                                <Text style={academicStyles.itemSubtitle}>{exp.location}</Text>
+                                 <View style={academicStyles.itemList}>
+                                    <View style={academicStyles.bulletPoint}><Text style={academicStyles.bullet}>•</Text><Text style={academicStyles.bulletText}>{exp.description}</Text></View>
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+                
+                {skills.length > 0 && (
+                    <View style={academicStyles.section}>
+                        <View style={academicStyles.sectionTitleContainer}><Text style={academicStyles.sectionTitle}>Technical Skills</Text></View>
+                        <View style={academicStyles.skillsSection}>
+                            {skills.map((skillLine, i) => {
+                                const parts = skillLine.split(':');
+                                const category = parts[0] ? `${parts[0]}: ` : '';
+                                const skillsText = parts[1] || '';
+                                return (
+                                    <View key={i} style={academicStyles.skillItem}>
+                                        <Text style={academicStyles.skillCategory}>{category}</Text>
+                                        <Text style={academicStyles.skillText}>{skillsText}</Text>
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    </View>
+                )}
+            </Page>
+        </Document>
+    );
 };
 
-module.exports = { getResumeHTML };
+
+// --- STYLES FOR TEMPLATE 2: Professional ---
+const professionalStyles = StyleSheet.create({
+    page: { fontFamily: 'Helvetica', fontSize: 10, padding: '1.5cm', color: '#333' },
+    header: { textAlign: 'center', borderBottomWidth: 2, borderBottomColor: '#333', paddingBottom: 12, marginBottom: 12 },
+    name: { fontSize: 26, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2 },
+    title: { fontSize: 12, color: '#444', marginTop: 4 },
+    contactInfo: { textAlign: 'center', fontSize: 9, color: '#555', marginBottom: 15 },
+    section: { marginBottom: 15 },
+    sectionTitle: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', borderBottomWidth: 1, borderBottomColor: '#555', paddingBottom: 4, marginBottom: 8 },
+    item: { marginBottom: 12 },
+    itemHeader: { flexDirection: 'row', justifyContent: 'space-between', fontSize: 10.5, fontWeight: 'bold' },
+    itemSubheader: { fontStyle: 'italic', color: '#444', marginVertical: 2 },
+    bulletPoint: { flexDirection: 'row', marginBottom: 4, paddingLeft: 5 },
+    bullet: { width: 10, fontSize: 10 },
+    bulletText: { flex: 1 },
+    summaryText: { lineHeight: 1.5, textAlign: 'justify' },
+});
+
+
+// --- COMPONENT FOR TEMPLATE 2: Professional ---
+const ProfessionalTemplate = ({ resumeData }) => {
+    const { personalDetails = {}, sections = [], summary = '', experience = [], projects = [], education = [], skills = [] } = resumeData;
+    
+    const renderBulletPoints = (points) => (points || []).map((point, j) => (
+        <View key={j} style={professionalStyles.bulletPoint}><Text style={professionalStyles.bullet}>•</Text><Text style={professionalStyles.bulletText}>{point}</Text></View>
+    ));
+
+    return (
+        <Document>
+            <Page size="A4" style={professionalStyles.page}>
+                <View style={professionalStyles.header}><Text style={professionalStyles.name}>{personalDetails.name || ''}</Text><Text style={professionalStyles.title}>{personalDetails.professionalTitle || ''}</Text></View>
+                <Text style={professionalStyles.contactInfo}>{personalDetails.phone || ''} • {personalDetails.email || ''}</Text>
+                {sections.map((section, i) => {
+                    if (section.key === 'summary' && summary) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text><Text style={professionalStyles.summaryText}>{summary}</Text></View>);
+                    if (section.key === 'experience' && experience) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text>{experience.map((exp, j) => (<View key={j} style={professionalStyles.item}><View style={professionalStyles.itemHeader}><Text>{exp.jobTitle || ''}</Text><Text>{exp.duration || ''}</Text></View><Text style={professionalStyles.itemSubheader}>{exp.company || ''}</Text>{renderBulletPoints([exp.description])}</View>))}</View>);
+                    if (section.key === 'projects' && projects) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text>{projects.map((proj, j) => (<View key={j} style={professionalStyles.item}><View style={professionalStyles.itemHeader}><Text>{proj.projectTitle || ''}</Text></View><Text style={professionalStyles.itemSubheader}>{proj.description || ''}</Text>{renderBulletPoints(proj.bulletPoints)}</View>))}</View>);
+                    if (section.key === 'education' && education) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text>{education.map((edu, j) => (<View key={j} style={professionalStyles.item}><View style={professionalStyles.itemHeader}><Text>{edu.universityName || ''}</Text><Text>{edu.duration || ''}</Text></View><Text style={professionalStyles.itemSubheader}>{edu.degree || ''}</Text></View>))}</View>);
+                    if (section.key === 'skills' && skills) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text><Text>{(skills || []).join(', ')}</Text></View>);
+                    if (section.isCustom) return (<View key={i} style={professionalStyles.section}><Text style={professionalStyles.sectionTitle}>{section.title}</Text>{section.type === 'list-with-bullets' ? ((resumeData[section.key] || []).map((item, j) => (<View key={j} style={professionalStyles.item}><View style={professionalStyles.itemHeader}><Text>{item.title || ''}</Text></View><Text style={professionalStyles.itemSubheader}>{item.subtitle || ''}</Text>{renderBulletPoints(item.bulletPoints)}</View>))) : section.type === 'single-input-and-description' ? ((resumeData[section.key] || []).map((item, j) => (<View key={j} style={professionalStyles.item}><View style={professionalStyles.itemHeader}><Text>{item.title || ''}</Text></View><Text style={professionalStyles.summaryText}>{item.description || ''}</Text></View>))) : (<Text style={professionalStyles.summaryText}>{resumeData[section.key] || ''}</Text>)}</View>);
+                    return null;
+                })}
+            </Page>
+        </Document>
+    );
+};
+
+// --- Main Document Router ---
+const PdfDocument = ({ resumeData, templateName = 'Professional' }) => {
+    if (templateName.toLowerCase() === 'academic') {
+        return <AcademicTemplate resumeData={resumeData} />;
+    }
+    return <ProfessionalTemplate resumeData={resumeData} />;
+};
+
+// --- Generate PDF Function ---
+const generatePdf = async (resumeData, templateName) => {
+    try {
+        const stream = await renderToStream(<PdfDocument resumeData={resumeData} templateName={templateName} />);
+        return stream;
+    } catch (error) {
+        console.error("React-PDF Generation Error:", error);
+        throw new Error('Could not generate PDF.');
+    }
+};
+
+module.exports = { generatePdf };

@@ -1,153 +1,124 @@
 
-// const express = require('express'); 
-// const mongoose = require('mongoose'); 
-// const cors = require('cors');       
-// const dotenv = require('dotenv');   
+// const express = require('express');
+// const dotenv = require('dotenv');
+// const cookieParser = require('cookie-parser');
+// const cors = require('cors'); // THIS LINE FIXES THE ERROR
+// const path = require('path');
 
-// const authRouter = require('./routes/authroutes');     
-// const resumeRouter = require('./routes/resumeroutes'); 
-// const { notFound, errorHandler } = require('./middlewares/errorHandler'); 
-
+// // Configure dotenv at the very top
 // dotenv.config();
 
+// const { connectDB } = require('./config/db');
+// const { notFound, errorHandler } = require('./middlewares/errorHandler');
+
+// // Import routes
+// const authRouter = require('./routes/authroutes');
+// const resumeRoutes = require('./routes/resumeroutes');
+// const aiRoutes = require('./routes/ai-routes');
 
 // const app = express();
 
-// // Add this simple route to handle GET requests to the root URL
-// app.get("/", (req, res) => {
-//   res.send("Backend server is running.");
-// });
+// // Connect to MongoDB
+// connectDB();
 
-// // ... your other app.use routes go here ...
-// // e.g., app.use('/api/users', userRoutes);
+// // --- START: FINAL CORS FIX ---
+// app.use(cors({
+//     origin: 'http://localhost:3000',
+//     credentials: true,
+// }));
+// // --- END: FINAL CORS FIX ---
 
-// const corsOptions = {
-//   origin: 'https://abdevillerss.github.io',
-//   optionsSuccessStatus: 200 // For legacy browser support
-// };
+// // Middlewares to parse request bodies
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cookieParser());
 
-// app.use(cors(corsOptions));   
-
-
-// app.use((req, res, next) => {
-//   // Allow requests from your specific frontend URL
-//   res.setHeader('Access-Control-Allow-Origin', 'https://abdevillerss.github.io');
-
-//   // Allow specific methods the browser can use
-//   res.setHeader(
-//     'Access-Control-Allow-Methods',
-//     'GET, POST, PUT, DELETE, PATCH, OPTIONS'
-//   );
-
-//   // Allow specific headers the browser can send
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'Content-Type, Authorization'
-//   );
-
-//   // Handle the OPTIONS preflight request
-//   if (req.method === 'OPTIONS') {
-//     return res.sendStatus(200);
-//   }
-
-//   next();
-// });// Enables CORS for all routes, allowing our frontend to make requests.
-// app.use(express.json()); 
-
-// app.use((req, res, next) => {
-//     console.log(`Incoming Request: ${req.method} ${req.originalUrl}`);
-//     next(); // Pass control to the next middleware/handler
-// });
-// const MONGO_URI = process.env.MONGO_URI;
-
-
-// mongoose.connect(MONGO_URI)
-//     .then(() => console.log('Successfully connected to MongoDB.')) // Log a success message.
-//     .catch(err => {
-
-//         console.error('Database connection error:', err);
-//         process.exit(1);
-//     });
-
-
+// // API Routes
 // app.use('/api/auth', authRouter);
+// app.use('/api/resume', resumeRoutes);
+// app.use('/api/ai', aiRoutes);
 
-// app.use('/api/resumes', resumeRouter);
+// // --- Deployment Configuration ---
+// if (process.env.NODE_ENV === 'production') {
+//     const __dirname = path.resolve();
+//     app.use(express.static(path.join(__dirname, 'frontend/build')));
+//     app.get('*', (req, res) =>
+//         res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+//     );
+// } else {
+//     app.get('/', (req, res) => {
+//         res.send('API is running....');
+//     });
+// }
 
-// app.use(notFound);     
-// app.use(errorHandler); 
+// // Error Middlewares
+// app.use(notFound);
+// app.use(errorHandler);
 
-// const PORT = process.env.PORT || 3001;
-
+// const PORT = process.env.PORT || 8000;
 
 // app.listen(PORT, () => {
-//     console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+//     console.log(`Server running on port ${PORT}`);
 // });
+
+
+
 
 
 
 
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 const dotenv = require('dotenv');
-
-// Load environment variables from .env file
-dotenv.config();
-
-// --- Make sure these paths are correct for your file structure ---
-const authRouter = require('./routes/authroutes');
-const resumeRouter = require('./routes/resumeroutes');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const { connectDB } = require('./config/db');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
-// --- Create the Express App ---
+// Import routes
+const authRouter = require('./routes/authroutes');
+const resumeRoutes = require('./routes/resumeroutes');
+const aiRoutes = require('./routes/ai-routes');
+
+// Configure dotenv
+dotenv.config();
+
 const app = express();
 
-// --- THE FINAL CORS FIX ---
-// This robust configuration handles the browser's preflight request.
-// It MUST come before your routes are defined.
+// Connect to MongoDB
+connectDB();
+
+// --- START: CORRECT CORS SETUP FOR RENDER ---
+// This configuration allows your live frontend to communicate with your backend.
+// It reads the frontend's URL from an environment variable you will set in Render.
 const corsOptions = {
-  origin: 'https://abdevillerss.github.io', // Your frontend URL
-  methods: "GET,POST,PUT,DELETE,PATCH,HEAD",
-  credentials: true
+  origin: process.env.FRONTEND_URL,
+  credentials: true, // If you need to handle cookies or authorization headers
+  optionsSuccessStatus: 200
 };
-app.options('*', cors(corsOptions)); // Handle preflight requests
-app.use(cors(corsOptions)); // Handle all other requests
+app.use(cors(corsOptions));
+// --- END: CORRECT CORS SETUP FOR RENDER ---
 
-// --- Middleware ---
-// This allows your server to understand incoming JSON data.
+// Middlewares to parse request bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// --- Database Connection ---
-const MONGO_URI = process.env.MONGO_URI;
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('Successfully connected to MongoDB.'))
-    .catch(err => {
-        console.error('Database connection error:', err);
-    });
-
-// --- API Routes ---
+// API Routes
 app.use('/api/auth', authRouter);
-app.use('/api/resumes', resumeRouter);
+app.use('/api/resume', resumeRoutes);
+app.use('/api/ai', aiRoutes);
 
-// --- Root Route for Health Check ---
-app.get("/", (req, res) => {
-  res.send("Backend server is running correctly.");
+// Test route
+app.get('/', (req, res) => {
+    res.send('API is running successfully...');
 });
 
-// --- Error Handling Middleware ---
-// This MUST come AFTER your routes.
+// Error Middlewares
 app.use(notFound);
 app.use(errorHandler);
 
-// --- Local Server Start ---
-// This part runs the server when you are testing on your own computer.
-// Vercel will ignore this block.
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+const PORT = process.env.PORT || 8000;
 
-// --- Vercel Export ---
-// This is what Vercel uses to run your code in its environment.
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

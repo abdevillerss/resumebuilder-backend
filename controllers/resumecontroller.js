@@ -1,151 +1,208 @@
-const Resume = require('../models/resumeModel');
-const puppeteer = require('puppeteer');
-const { getResumeHTML } = require('../utils/pdfTemplate');
+// const Resume = require('../models/resumeModel.js');
+// const { generatePdf } = require('../utils/pdfTemplate.js');
 
-const createResume = async (req, res) => {
-    const { templateName, resumeData } = req.body;
-    try {
-        const resume = new Resume({ user: req.user._id, templateName, resumeData });
-        const createdResume = await resume.save();
-        res.status(201).json(createdResume);
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-};
+// // @desc    Get all resumes for the logged-in user
+// // @route   GET /api/resume
+// const getMyResumes = async (req, res) => {
+//     const resumes = await Resume.find({ user: req.user._id });
+//     res.status(200).json(resumes);
+// };
 
-const getUserResumes = async (req, res) => {
+// // @desc    Get a single resume by its ID
+// // @route   GET /api/resume/:id
+// const getResumeById = async (req, res) => {
+//     const resume = await Resume.findById(req.params.id);
+//     if (resume && resume.user.toString() === req.user._id.toString()) {
+//         res.status(200).json(resume);
+//     } else {
+//         res.status(404).json({ message: 'Resume not found' });
+//     }
+// };
+
+// // @desc    Create a new resume
+// // @route   POST /api/resume
+// const createResume = async (req, res) => {
+//     const { templateName, resumeData } = req.body;
+//     const resume = new Resume({
+//         user: req.user._id,
+//         templateName,
+//         resumeData,
+//     });
+//     const createdResume = await resume.save();
+//     res.status(201).json(createdResume);
+// };
+
+// // @desc    Update an existing resume
+// // @route   PUT /api/resume/:id
+// const updateResume = async (req, res) => {
+//     const { resumeData, templateName } = req.body;
+//     const resume = await Resume.findById(req.params.id);
+
+//     if (resume && resume.user.toString() === req.user._id.toString()) {
+//         resume.resumeData = resumeData || resume.resumeData;
+//         resume.templateName = templateName || resume.templateName;
+//         const updatedResume = await resume.save();
+//         res.status(200).json(updatedResume);
+//     } else {
+//         res.status(404).json({ message: 'Resume not found' });
+//     }
+// };
+
+// // @desc    Delete a resume
+// // @route   DELETE /api/resume/:id
+// const deleteResume = async (req, res) => {
+//     const resume = await Resume.findById(req.params.id);
+//     if (resume && resume.user.toString() === req.user._id.toString()) {
+//         await resume.deleteOne();
+//         res.status(200).json({ message: 'Resume removed' });
+//     } else {
+//         res.status(404).json({ message: 'Resume not found' });
+//     }
+// };
+
+// // @desc    Generate a PDF preview
+// // @route   POST /api/resume/preview
+// const generatePdfPreview = async (req, res) => {
+//     try {
+//         const { resumeData, templateName } = req.body;
+//         const pdfBuffer = await generatePdf(resumeData, templateName);
+//         res.setHeader('Content-Type', 'application/pdf');
+//         res.send(pdfBuffer);
+//     } catch (error) {
+//         console.error('PDF Generation Error:', error);
+//         res.status(500).send('Error generating PDF');
+//     }
+// };
+
+
+// module.exports = {
+//     getMyResumes,
+//     getResumeById,
+//     createResume,
+//     updateResume,
+//     deleteResume,
+//     generatePdfPreview,
+// };
+
+
+
+
+const Resume = require('../models/resumeModel.js');
+const { generatePdf } = require('../utils/pdfTemplate.js');
+
+// @desc    Get all resumes for the logged-in user
+const getMyResumes = async (req, res) => {
     try {
         const resumes = await Resume.find({ user: req.user._id });
-        res.json(resumes);
+        res.status(200).json(resumes);
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        res.status(500).json({ message: 'Server error while fetching resumes.' });
     }
 };
 
+// @desc    Get a single resume by its ID
 const getResumeById = async (req, res) => {
     try {
         const resume = await Resume.findById(req.params.id);
         if (resume && resume.user.toString() === req.user._id.toString()) {
-            res.json(resume);
+            res.status(200).json(resume);
         } else {
-            res.status(404).json({ message: 'Resume not found or user not authorized' });
+            res.status(404).json({ message: 'Resume not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        res.status(500).json({ message: 'Server error while fetching resume.' });
     }
 };
 
-const updateResume = async (req, res) => {
-    const { templateName, resumeData } = req.body;
+// @desc    Create a new resume
+const createResume = async (req, res) => {
     try {
-        const resume = await Resume.findById(req.params.id);
-        if (resume && resume.user.toString() === req.user._id.toString()) {
-            resume.templateName = templateName || resume.templateName;
-            resume.resumeData = resumeData || resume.resumeData;
-            const updatedResume = await resume.save();
-            res.json(updatedResume);
-        } else {
-            res.status(404).json({ message: 'Resume not found or user not authorized' });
-        }
+        const { templateName, resumeData } = req.body;
+        const resume = new Resume({
+            user: req.user._id,
+            templateName,
+            resumeData,
+        });
+        const createdResume = await resume.save();
+        res.status(201).json(createdResume);
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        res.status(400).json({ message: 'Error creating resume.' });
     }
 };
 
+// @desc    Update an existing resume
+const updateResume = async (req, res) => {
+    try {
+        const { resumeData, templateName } = req.body;
+        const resume = await Resume.findById(req.params.id);
+
+        if (resume && resume.user.toString() === req.user._id.toString()) {
+            resume.resumeData = resumeData || resume.resumeData;
+            resume.templateName = templateName || resume.templateName;
+            const updatedResume = await resume.save();
+            res.status(200).json(updatedResume);
+        } else {
+            res.status(404).json({ message: 'Resume not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: 'Error updating resume.' });
+    }
+};
+
+// @desc    Delete a resume
 const deleteResume = async (req, res) => {
     try {
         const resume = await Resume.findById(req.params.id);
         if (resume && resume.user.toString() === req.user._id.toString()) {
             await resume.deleteOne();
-            res.json({ message: 'Resume removed' });
+            res.status(200).json({ message: 'Resume removed' });
         } else {
-            res.status(404).json({ message: 'Resume not found or user not authorized' });
+            res.status(404).json({ message: 'Resume not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        res.status(500).json({ message: 'Server error while deleting resume.' });
     }
 };
 
+// @desc    Generate a PDF preview
+// --- FIX: This function now correctly handles the request payload and provides better error logging ---
+// const generatePdfPreview = async (req, res) => {
+//     try {
+//         const { resumeData, templateName } = req.body;
+//         if (!resumeData) {
+//             return res.status(400).json({ message: 'No resume data provided for preview.' });
+//         }
+        
+//         const pdfBuffer = await generatePdf(resumeData, templateName);
+//         res.setHeader('Content-Type', 'application/pdf');
+//         res.send(pdfBuffer);
+//     } catch (error) {
+//         console.error('PUPPETEER PDF GENERATION ERROR:', error);
+//         res.status(500).json({ message: 'Error generating PDF preview on the server.' });
+//     }
+// };
 
-const downloadResumePDF = async (req, res) => {
-    let browser;
-    try {
-        const resume = await Resume.findById(req.params.id);
-        if (!resume || resume.user.toString() !== req.user._id.toString()) {
-            return res.status(404).json({ message: 'Resume not found or user not authorized' });
-        }
-        browser = await puppeteer.launch({ 
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        const htmlContent = getResumeHTML(resume.resumeData, resume.templateName);
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
-        });
-        res.setHeader('Content-Type', 'application/pdf');
-        const filename = resume.resumeData.personalDetails?.name?.replace(/\s+/g, '_') || 'resume';
-        res.setHeader('Content-Disposition', `attachment; filename=${filename}.pdf`);
-        res.send(pdfBuffer);
-    } catch (error) {
-        console.error("PDF Generation Error:", error);
-        res.status(500).json({ message: 'Server Error while generating PDF', error: error.message });
-    } finally {
-        if (browser) {
-            await browser.close();
-        }
-    }
-};
+// backend/controllers/resumecontroller.js
 
-/**
- * @desc    Generate a PDF preview from provided data without saving
- * @route   POST /api/resumes/preview
- * @access  Private
- */
-const generatePreviewPDF = async (req, res) => {
-    let browser;
+const generatePdfPreview = async (req, res) => {
     try {
         const { resumeData, templateName } = req.body;
-
-        if (!resumeData || !templateName) {
-            return res.status(400).json({ message: 'Resume data and template name are required for a preview.' });
+        if (!resumeData) {
+            return res.status(400).json({ message: 'No resume data provided for preview.' });
         }
-
-        browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-
-        const page = await browser.newPage();
-        const htmlContent = getResumeHTML(resumeData, templateName);
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
-        });
-
+        const stream = await generatePdf(resumeData, templateName);
         res.setHeader('Content-Type', 'application/pdf');
-        res.send(pdfBuffer);
+        stream.pipe(res);
     } catch (error) {
-        console.error("PDF Preview Generation Error:", error);
-        res.status(500).json({ message: 'Server Error while generating PDF preview', error: error.message });
-    } finally {
-        if (browser) {
-            await browser.close();
-        }
+        console.error('PDF Preview Error:', error);
+        res.status(500).json({ message: 'Error generating PDF preview.' });
     }
 };
-
 module.exports = {
-    createResume,
-    getUserResumes,
+    getMyResumes,
     getResumeById,
+    createResume,
     updateResume,
     deleteResume,
-    downloadResumePDF,
-    generatePreviewPDF, 
+    generatePdfPreview,
 };

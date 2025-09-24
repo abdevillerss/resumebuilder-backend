@@ -1,41 +1,28 @@
 const express = require('express');
-const resumeRouter = express.Router();
+const router = express.Router();
 const {
-    createResume,
-    getUserResumes,
+    getMyResumes,
     getResumeById,
+    createResume,
     updateResume,
     deleteResume,
-    downloadResumePDF,
-    generatePreviewPDF, 
+    generatePdfPreview,
 } = require('../controllers/resumecontroller');
 const { protect } = require('../middlewares/authmiddleware');
 
-resumeRouter.route('/')
-    .post(protect, createResume)
-    .get(protect, getUserResumes);
+router.route('/').get(protect, getMyResumes).post(protect, createResume);
 
-resumeRouter.route('/preview')
-    .post(protect, generatePreviewPDF);
-
-resumeRouter.route('/:id/download')
-    .get(protect, downloadResumePDF);
-
-resumeRouter
+router
     .route('/:id')
     .get(protect, getResumeById)
     .put(protect, updateResume)
     .delete(protect, deleteResume);
 
-module.exports = resumeRouter;
+// --- THIS IS THE FIX ---
+// The route now includes the "/:id" parameter to match what the frontend will send.
+router.post('/preview/:id', protect, generatePdfPreview);
 
-
-
-
-
-
-
-
+module.exports = router;
 
 
 
